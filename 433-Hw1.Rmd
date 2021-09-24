@@ -1,0 +1,59 @@
+---
+title: "433 HW1"
+author: "Dominic Solberg"
+date: "9/19/2021"
+output: github_document
+---
+
+```{r}
+library(dplyr)
+library(readr)
+library(ggplot2)
+data <- read_delim("2020hwybronefiledel.zip")
+```
+
+```{r}
+head(data)
+```
+```{r}
+new.data <- transmute(data,
+       "StateCode" = as.factor(STATE_CODE_001),
+       "CountyCode" = as.factor(COUNTY_CODE_003),
+       "PlaceCode" = as.factor(PLACE_CODE_004),
+       "YearBuilt" = as.factor(YEAR_BUILT_027),
+       "DeckCond" = as.factor(DECK_COND_058),
+       "SuperCond" = as.factor(SUPERSTRUCTURE_COND_059),
+       "SubCond" = as.factor(SUBSTRUCTURE_COND_060),
+       "ChannelCond" = as.factor(CHANNEL_COND_061),
+       "CulvertCond" = as.factor(CULVERT_COND_062),
+       "DeckArea" = DECK_AREA)
+```
+
+```{r}
+str(new.data)
+```
+
+```{r}
+#looking at the comparison of year the bridge was built and the deck
+#area, unsuprisingly the bridges built over 100 years ago do not 
+#have much area. However, 
+ggplot(new.data, aes(x=YearBuilt, y=DeckArea)) + geom_point()
+```
+
+```{r}
+#just glimpsing at the data, I noticed that whenever there is NA for
+#superstructure condition, the deck and substructure condition was
+#also NA, and then there was a culvert condition rating.
+culvert.data <- filter(new.data, DeckCond == "N")
+
+#would like to compare channel condition ratings between bridges and culverts condition ratings
+ggplot(culvert.data, aes(x=ChannelCond, y=ChannelCond)) + geom_col() + labs(title="Culvert Channel Condition Ratings",x="Condition Rating", y="Count")
+summary(culvert.data$ChannelCond)
+```
+
+```{r}
+anticulvert.data <- filter(new.data, DeckCond != "N")
+ggplot(anticulvert.data, aes(x=ChannelCond, y=ChannelCond)) + geom_col() + labs(title="Bridge Channel Condition Ratings",x="Condition Rating", y="Count")
+summary(anticulvert.data$ChannelCond)
+```
+
